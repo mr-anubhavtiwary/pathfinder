@@ -57,6 +57,13 @@ def handle_mouse_click(event, grid, start_box_set, target_box_set, start_box, ta
         target_box.target = True
         target_box_set = True
         
+    elif event.button == 3:  # right-click to remove obstacles
+        col = event.pos[0] // box_width
+        row = event.pos[1] // box_height
+        if not start_box_set or (col, row) != (start_box_col, start_box_row):
+            if not target_box_set or (col, row) != (target_box_col, target_box_row):
+                grid[col][row].wall = False
+        
     return start_box_set, target_box_set, start_box, target_box, start_box_col, start_box_row, target_box_col, target_box_row
 
 def main():
@@ -66,7 +73,7 @@ def main():
     
     # set window name
     pygame.display.set_caption("PATHFINDER")
-    window = pygame.display.set_mode((window_width, window_height))
+    window = pygame.display.set_mode((window_width, window_height), pygame.RESIZABLE)
     
     # initializing variables
     columns = 50
@@ -112,12 +119,9 @@ def main():
                     col = x // box_width
                     row = y // box_height
                     # avoiding start and target points
-                    if(col == start_box_col and row == start_box_row):
-                        continue
-                    if(col == target_box_col and row == target_box_row):
-                        continue 
-                    
-                    grid[col][row].wall = True
+                    if(col, row) != (start_box_col, start_box_row):
+                        if(col, row) != (target_box_col, target_box_row): 
+                            grid[col][row].wall = True
                         
             # keyboard input
             elif event.type == pygame.KEYDOWN:
