@@ -105,7 +105,8 @@ def main():
             
             # start algorithm
             if event.type == pygame.KEYDOWN and target_box_set:
-                begin_search = True
+                if event.key == pygame.K_SPACE:
+                    begin_search = True
            
         # djikstra algorithm     
         if begin_search:
