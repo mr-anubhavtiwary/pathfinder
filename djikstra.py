@@ -99,7 +99,7 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-                
+                    
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 start_box_set, target_box_set, start_box, target_box, start_box_col, start_box_row, target_box_col, target_box_row = handle_mouse_click(event, grid, start_box_set, target_box_set, start_box, target_box, queue, box_width, box_height, start_box_col, start_box_row, target_box_col, target_box_row)
             
@@ -119,9 +119,14 @@ def main():
                     
                     grid[col][row].wall = True
                         
-            # algorithm initialization key = space
+            # keyboard input
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and target_box_set:
+                # reset using key = r
+                if event.key == pygame.K_r:
+                    main()
+                
+                # algorithm initialization key = space
+                elif event.key == pygame.K_SPACE and target_box_set:
                     begin_search = True
         
         # Djikstra algorithm
