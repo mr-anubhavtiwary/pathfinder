@@ -56,17 +56,16 @@ for i in range(columns):
     for j in range(rows):
         grid[i][j].set_neighbours()
     
-start_box = grid[0][0]
-start_box.start = True
-start_box.visited = True
-queue.append(start_box)
+
 
 def main():
     begin_search = False
     target_box_set = False
+    start_box_set = False
     searching = True
+    start_box = None
     target_box = None
-    
+           
     
     while True:
         for event in pygame.event.get():
@@ -74,6 +73,24 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+                
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and start_box_set == False:
+                i = x // box_width
+                j = y // box_height
+                start_box = grid[i][j]
+                start_box.start = True
+                start_box.visited = True
+                start_box_set = True
+                queue.append(start_box)
+                
+            # for target point
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and target_box_set == False:
+                i = x // box_width
+                j = y // box_height
+                target_box = grid[i][j]
+                target_box.target = True
+                target_box_set = True
+                
             # Mouse controls
             elif event.type == pygame.MOUSEMOTION:
                 x = pygame.mouse.get_pos()[0]
@@ -84,14 +101,7 @@ def main():
                     i = x // box_width
                     j = y // box_height
                     grid[i][j].wall = True
-                
-                # set target
-                if event.buttons[2] and not target_box_set:
-                    i = x // box_width
-                    j = y // box_height
-                    target_box = grid[i][j]
-                    target_box.target = True
-                    target_box_set = True
+
             
             # start algorithm
             if event.type == pygame.KEYDOWN and target_box_set:
