@@ -104,7 +104,32 @@ def dfs(list, start_box, target_box, searching, path):
             while current_box.prior != start_box:
                 path.append(current_box.prior)
                 current_box = current_box.prior
-            path.reverse()
+            return searching
+        
+        for neighbour in current_box.neighbours:
+            if not neighbour.queued and not neighbour.wall:
+                neighbour.queued = True
+                neighbour.prior = current_box
+                list.append(neighbour)
+    else:        
+        if searching:
+            Tk().wm_withdraw()
+            messagebox.showinfo("Alert", "No path Found!")
+            searching = False
+    
+    return searching
+
+# breadth first search algorithm
+def bfs(list, start_box, target_box, searching, path):
+    if len(list) and searching:
+        current_box = list.pop(0)
+        current_box.visited = True
+        
+        if current_box == target_box:
+            searching = False
+            while current_box.prior != start_box:
+                path.append(current_box.prior)
+                current_box = current_box.prior
             return searching
         
         for neighbour in current_box.neighbours:
@@ -199,6 +224,9 @@ def main():
             
         elif begin_search == 2:
             searching = dfs(list, start_box, target_box, searching, path)
+            
+        elif begin_search == 3:
+            searching = bfs(list, start_box, target_box, searching, path)
         
         # creating blank window
         window.fill((120, 120, 120))
