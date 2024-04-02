@@ -1,8 +1,14 @@
-from tkinter import messagebox, Tk
 import pygame
 import sys
-window_width = 800
-window_height = 800
+from tkinter import messagebox, Tk
+
+window_width = 700
+window_height = 700
+
+pygame.init()
+
+# Title and Icon
+pygame.display.set_caption("PATHFINDER")
 
 window = pygame.display.set_mode((window_width, window_height))
 columns = 50
@@ -35,13 +41,13 @@ class Box:
     
     def set_neighbours(self):
         if self.x > 0:
-            self.neighbours.append(grid[self.x - 1][self.y])
+            self.neighbours.append(grid[self.x - 1][self.y])   # left box
         if self.x < columns - 1:
-            self.neighbours.append(grid[self.x + 1][self.y])
+            self.neighbours.append(grid[self.x + 1][self.y])    # right box
         if self.y > 0:
-            self.neighbours.append(grid[self.x][self.y - 1])
+            self.neighbours.append(grid[self.x][self.y - 1])    # up box
         if self.y < rows - 1:
-            self.neighbours.append(grid[self.x][self.y + 1])
+            self.neighbours.append(grid[self.x][self.y + 1])    # down box
             
             
 # create grid
@@ -57,7 +63,7 @@ for i in range(columns):
         grid[i][j].set_neighbours()
     
 
-
+# Inside the main function
 def main():
     begin_search = False
     target_box_set = False
@@ -65,7 +71,10 @@ def main():
     searching = True
     start_box = None
     target_box = None
-           
+    start_i = None
+    start_j = None
+    target_i = None
+    target_j = None
     
     while True:
         for event in pygame.event.get():
@@ -75,9 +84,9 @@ def main():
                 sys.exit()
                 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and start_box_set == False:
-                i = x // box_width
-                j = y // box_height
-                start_box = grid[i][j]
+                start_i = x // box_width
+                start_j = y // box_height
+                start_box = grid[start_i][start_j]
                 start_box.start = True
                 start_box.visited = True
                 start_box_set = True
@@ -85,9 +94,9 @@ def main():
                 
             # for target point
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and target_box_set == False:
-                i = x // box_width
-                j = y // box_height
-                target_box = grid[i][j]
+                target_i = x // box_width
+                target_j = y // box_height
+                target_box = grid[target_i][target_j]
                 target_box.target = True
                 target_box_set = True
                 
@@ -100,6 +109,10 @@ def main():
                 if event.buttons[0]:
                     i = x // box_width
                     j = y // box_height
+                    if(i == start_i and j == start_j):
+                        continue
+                    if(i == target_i and j == target_j):
+                        continue 
                     grid[i][j].wall = True
 
             
@@ -129,7 +142,6 @@ def main():
                     Tk().wm_withdraw()
                     messagebox.showinfo("Alert", "No path Found!")
                     searching = False
-        
         
         
         # fill with black color in border
