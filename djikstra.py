@@ -116,7 +116,7 @@ def main():
             else:
                 if searching:
                     Tk().wm_withdraw()
-                    messagebox.showinfo("No Solution", "There is no solution!")
+                    messagebox.showinfo("Alert", "No path Found!")
                     searching = False
         
         
@@ -127,22 +127,22 @@ def main():
         for i in range(columns):
             for j in range(rows):
                 box = grid[i][j]
-                box.draw(window, (200, 200, 200))
+                box.draw(window, (255, 255, 255))
                 
                 if box.queued:
-                    box.draw(window, (200, 0, 0))
+                    box.draw(window, (34, 108, 115))
                 if box.visited:
-                    box.draw(window, (0, 200, 0))
+                    box.draw(window, (36, 227, 244))
                 if box in path:
-                    box.draw(window, (0, 0, 200))
+                    box.draw(window, (106, 248, 144))
                     
                     
                 if box.start:
-                    box.draw(window, (0, 200, 200))
+                    box.draw(window, (106, 122, 248))
                 if box.wall:
-                    box.draw(window, (90, 90, 90))
+                    box.draw(window, (76, 48, 37))
                 if box.target:
-                    box.draw(window, (200, 200, 0))
+                    box.draw(window, (244, 36, 102))
                 
         pygame.display.flip()
     
