@@ -81,12 +81,16 @@ class Box:
     def set_neighbours(self, grid, columns, rows):
         if self.x > 0:
             self.neighbours.append(grid[self.x - 1][self.y])   # left box
+            
         if self.x < columns - 1:
             self.neighbours.append(grid[self.x + 1][self.y])    # right box
+            
         if self.y > 0:
             self.neighbours.append(grid[self.x][self.y - 1])    # up box
+            
         if self.y < rows - 1:
             self.neighbours.append(grid[self.x][self.y + 1])    # down box
+            
         # if self.x > 0 and self.y > 0:
         #     self.neighbours.append(grid[self.x - 1][self.y - 1])    # up-left
         # if self.x > 0 and self.y < rows - 1:
@@ -96,11 +100,13 @@ class Box:
         # if self.x < columns - 1 and self.y < rows - 1:
         #     self.neighbours.append(grid[self.x + 1][self.y + 1])    # down-right
 
+
 # heuristic function
 def h(p1, p2):
     x1, y1 = p1
     x2, y2 = p2
     return abs(x1 - x2) + abs(y1 - y2)      # manhattan distance
+
 
 # handling mouse click events
 def handle_mouse_click(event, grid, start_box_set, target_box_set, start_box, target_box, list, box_width, box_height):
@@ -154,6 +160,7 @@ def handle_mouse_click(event, grid, start_box_set, target_box_set, start_box, ta
         
     return start_box_set, target_box_set, start_box, target_box
 
+
 # djikstra algorithm
 def djikstra(list, start_box, target_box, path):
     if len(list):           # run till queue is not empty
@@ -173,6 +180,7 @@ def djikstra(list, start_box, target_box, path):
                 list.append(neighbour)          # insert it in the queue
                                 
     return True
+
 
 # depth first search algorithm
 def dfs(list, start_box, target_box, path):
@@ -194,6 +202,7 @@ def dfs(list, start_box, target_box, path):
 
     return True
 
+
 # breadth first search algorithm
 def bfs(list, start_box, target_box, path):
     if len(list):
@@ -214,8 +223,37 @@ def bfs(list, start_box, target_box, path):
                 
     return True
 
+
+# A* algorithm
+def astar(list, g_score, f_score, start_box, target_box, path):
+    if len(list):
+        current_box = min(list, key=lambda box: f_score[box])           # assigning the min value to current box from all the queued and current f box value
+        list.remove(current_box)            # remove the current box from the
+        current_box.set_visited(True)            # mark the current box as visited
+        
+        if current_box == target_box:        # if target is found
+            while current_box.get_prior() != start_box:         # trace back the path till start box
+                path.append(current_box.get_prior())
+                current_box = current_box.get_prior()
+            return False
+        
+        for neighbour in current_box.neighbours:        # traverse in all neighbours of the current box(left, right, up, down)
+            temp_g_score = g_score[current_box] + 1         # using a temp variable to store current box g_score
+
+            if temp_g_score < g_score[neighbour]:       # if temp score is less than the neighbour boxes current g_score then
+                neighbour.set_prior(current_box)        # add current box as neighbour boxes prior
+                g_score[neighbour] = temp_g_score       # update g_score
+                f_score[neighbour] = temp_g_score + h(neighbour.get_pos(), target_box.get_pos())    #update f_score
+
+                if not neighbour.is_queued() and not neighbour.is_wall():   # not already queued and not a wall then
+                    neighbour.set_queued(True)  # mark it visited
+                    list.append(neighbour)      # add it to the queue
+
+    return True
+
+
 # Pathfinding algorithm initilization
-def initialize(begin_search, list, start_box, target_box, path):
+def initialize(begin_search, list, g_score, f_score, start_box, target_box, path):
     if begin_search == 1:
         searching = djikstra(list, start_box, target_box, path)
         if(not searching):
@@ -231,6 +269,11 @@ def initialize(begin_search, list, start_box, target_box, path):
         if(not searching):
             return 0
     
+    elif begin_search == 4:
+        searching = astar(list, g_score, f_score, start_box, target_box, path)
+        if(not searching):
+            return 0
+        
     return begin_search
 
 
@@ -262,6 +305,9 @@ def main():
     begin_search = 0                # search start key(1, 2, 3, 4)
     start_box = None                # start box object
     target_box = None               # target box object
+    g_score = {box: float('inf') for row in grid for box in row}                # g score gid of boxes with inf as value
+    f_score = {box: float('inf') for row in grid for box in row}                # f score gid of boxes with inf as value
+    
     
     # main iterator start(keeps the pygame window open until closed)
     while True:
@@ -272,7 +318,13 @@ def main():
                     
             elif event.type == pygame.MOUSEBUTTONDOWN:      # all mouse button press operations
                 start_box_set, target_box_set, start_box, target_box = handle_mouse_click(event, grid, start_box_set, target_box_set, start_box, target_box, list, box_width, box_height)
-            
+                # assign g_score of start point as 0
+                if start_box_set:
+                    g_score[start_box] = 0
+                # assign f_score of start point as heuristic of start and target point
+                if start_box_set and target_box_set:
+                    f_score[start_box] = h(start_box.get_pos(), target_box.get_pos())
+                
             elif event.type == pygame.MOUSEMOTION:          # mouse motion for drawing the wall
                 x = pygame.mouse.get_pos()[0]
                 y = pygame.mouse.get_pos()[1]
@@ -305,7 +357,7 @@ def main():
                     begin_search = 4
         
         # pathfinding algorithms initialization
-        begin_search = initialize(begin_search, list, start_box, target_box, path)
+        begin_search = initialize(begin_search, list, g_score, f_score, start_box, target_box, path)
         
         # when no path is found
         if len(list) == 0 and begin_search:
@@ -324,20 +376,25 @@ def main():
                 
                 if box.is_queued():
                     box.draw(window, DARKGREEN, box_width, box_height)
+                    
                 if box.is_visited():
                     box.draw(window, LIGHTBLUE, box_width, box_height)
+                    
                 if box in path:
                     box.draw(window, LIGHTGREEN, box_width, box_height)
+                    
                 if box.is_start():
                     box.draw(window, DARKBLUE, box_width, box_height)
+                    
                 if box.is_wall():
                     box.draw(window, BROWN, box_width, box_height)
+                    
                 if box.is_target():
                     box.draw(window, RED, box_width, box_height)
         
         pygame.display.flip()
         # pygame.time.delay(100)
 
+
 if __name__ == "__main__":
     main()
-
